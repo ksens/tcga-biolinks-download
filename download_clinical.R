@@ -4,7 +4,7 @@ library(TCGAbiolinks)
 source('~/coding/downloads/tcga-biolinks-download/functions.R')
 
 tcga_subprojects = formulate_tcga_subproject_dataframe()
-
+download_location = '/data/tcga_downloads/'
 for (idx in 1:length(tcga_subprojects$name)) {
   proj = tcga_subprojects$name[idx]
   
@@ -12,7 +12,7 @@ for (idx in 1:length(tcga_subprojects$name)) {
   message("idx: ", idx, " of ", nrow(tcga_subprojects), " --- TCGA subproject: ", proj)
   message("==============================================")
   
-  filename = paste0('~/Downloads/', proj, '-clinical_data.Rda')
+  filename = paste0(download_location, proj, '-clinical_data.Rda')
   
   if (!file.exists(filename)) {
     L1 = tryCatch({
