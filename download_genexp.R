@@ -4,6 +4,7 @@ library(TCGAbiolinks)
 source('~/coding/downloads/tcga-biolinks-download/functions.R')
 
 tcga_subprojects = formulate_tcga_subproject_dataframe()
+download_location = '/data/tcga_downloads/'
 workflow_types = c(
   "HTSeq - FPKM-UQ",
   "HTSeq - FPKM",
@@ -21,29 +22,31 @@ for (workflow_type in workflow_types) {
     message("==============================================")
     
     genexp_filename = paste0(
-      '~/Downloads/', 
+      download_location, 
       proj, '--', 
       gsub(" ", "", workflow_type), 
       '--genexp_data_grch38.Rda')
     
     if (!file.exists(genexp_filename)) {
-      # load(paste0('~/Downloads/', proj, '-clinical_data.Rda'))
-      
-      query <- GDCquery(project = proj,
-                        data.category = "Transcriptome Profiling",
-                        data.type = "Gene Expression Quantification",
-                        workflow.type = workflow_type)
-      GDCdownload(query)
-      data <- GDCprepare(query)
-      
-      # df1 = as.data.frame(colData(data))
-      # matrix_data = assay(data)
-      save(list = 'data',
-           file = genexp_filename
-      )
+      tryCatch({
+        query <- GDCquery(project = proj,
+                          data.category = "Transcriptome Profiling",
+                          data.type = "Gene Expression Quantification",
+                          workflow.type = workflow_type)
+        GDCdownload(query)
+        data <- GDCprepare(query)
+        
+        save(list = 'data',
+             file = genexp_filename
+        )
+      }, error = function(e) {
+        data = data.frame()
+        save(list = 'data',
+             file = genexp_filename
+        )
+      })
     } else {
       cat("Skipping since already downloaded\n")
     }
   }
-    
 }
